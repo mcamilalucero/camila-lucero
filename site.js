@@ -13,40 +13,40 @@ if(photoViewer){
 // Project views preserve existing deep links and browser back/forward.
 const projects=[...document.querySelectorAll('[data-project]')];
 const landing=[...document.querySelector('main').children].filter(el=>!el.matches('[data-project],[data-project-toolbar],footer'));
+let returnPosition=null;
+let restoreLandingY=null;
+try{returnPosition=JSON.parse(sessionStorage.getItem('portfolio-return-position')||'null');}catch{}
+document.addEventListener('click',event=>{
+ const link=event.target.closest('a[href^="#"]');
+ if(!link)return;
+ if(link.closest('[data-project-toolbar]')){
+  event.preventDefault();
+  const destination=returnPosition?.hash||'#proyectos';
+  restoreLandingY=Number.isFinite(returnPosition?.y)?returnPosition.y:null;
+  returnPosition=null;
+  try{sessionStorage.removeItem('portfolio-return-position');}catch{}
+  if(location.hash===destination)routeProject();else location.hash=destination;
+  return;
+ }
+ const target=document.getElementById(link.hash.slice(1));
+ if(target?.closest('[data-project]')&&!projects.some(project=>!project.hidden)){
+  returnPosition={hash:location.hash||'#inicio',y:window.scrollY};
+  try{sessionStorage.setItem('portfolio-return-position',JSON.stringify(returnPosition));}catch{}
+ }
+});
 function routeProject(){
  const id=decodeURIComponent(location.hash.slice(1));const target=document.getElementById(id);
  const selected=target?.closest('[data-project]');
  projects.forEach(p=>p.hidden=p!==selected);
  landing.forEach(p=>p.hidden=!!selected);
- document.querySelectorAll('[data-project-toolbar]').forEach(t=>{t.hidden=t.dataset.projectToolbar!==selected?.dataset.project;const select=t.querySelector('.content-select');if([...select.options].some(o=>o.value===location.hash))select.value=location.hash;});
+ document.querySelectorAll('[data-project-toolbar]').forEach(t=>{t.hidden=t.dataset.projectToolbar!==selected?.dataset.project;});
  document.querySelectorAll('.nav-dropdown').forEach(d=>d.open=false);
- requestAnimationFrame(()=>{if(target)target.scrollIntoView({block:'start',behavior:'instant'});syncContentSelect();});
+ requestAnimationFrame(()=>{
+  if(!selected&&restoreLandingY!==null){window.scrollTo({top:restoreLandingY,behavior:'instant'});restoreLandingY=null;}
+  else if(target)target.scrollIntoView({block:'start',behavior:'instant'});
+ });
 }
 window.addEventListener('hashchange',routeProject);routeProject();
-document.querySelectorAll('.project-toolbar select').forEach(s=>s.addEventListener('change',()=>{
- if(location.hash===s.value)routeProject();else location.hash=s.value;
-}));
-// Follow the section being read without adding history entries or moving the page.
-function syncContentSelect(){
- const project=projects.find(p=>!p.hidden);if(!project)return;
- const toolbar=document.querySelector('[data-project-toolbar="'+project.dataset.project+'"]');
- const select=toolbar.querySelector('.content-select');
- const boundary=Math.max(0,toolbar.getBoundingClientRect().bottom)+Math.min(120,innerHeight*.2);
- let current=select.options[0].value;
- for(const option of select.options){
-  const section=document.getElementById(option.value.slice(1));
-  if(section&&section.getBoundingClientRect().top<=boundary)current=option.value;
- }
- select.value=current;
-}
-let contentSyncPending=false;
-function scheduleContentSync(){
- if(contentSyncPending)return;contentSyncPending=true;
- requestAnimationFrame(()=>{contentSyncPending=false;syncContentSelect();});
-}
-window.addEventListener('scroll',scheduleContentSync,{passive:true});
-window.addEventListener('resize',scheduleContentSync);
-window.addEventListener('load',scheduleContentSync);
 
 document.addEventListener('click',e=>{document.querySelectorAll('.nav-dropdown[open]').forEach(d=>{if(!d.contains(e.target))d.open=false;});});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.nav-dropdown').forEach(d=>d.open=false);});
