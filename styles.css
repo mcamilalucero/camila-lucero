@@ -46,3 +46,11 @@ html{scroll-padding-top:165px}
 
 /* A dot describes each production step without implying navigation. */
 .steps span::before{content:"";display:inline-block;width:8px;height:8px;margin-right:15px;border-radius:50%;background:var(--green);vertical-align:middle}
+
+/* Profile illustration sits in the open column beside the introduction. */
+.profile-side{min-width:0}
+.profile-art{display:block;width:100%;max-width:300px;height:auto;margin-top:34px;border-radius:6px}
+@media(max-width:720px){.profile{display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"label" "copy" "art"}.profile-side{display:contents}.profile-side .section-label{grid-area:label}.profile-content{grid-area:copy}.profile-art{grid-area:art;width:min(100%,340px);margin-top:18px}}
+
+/* Darken keeps underlying letters legible where the pink highlight overlaps. */
+.hero h1 span{background:#e9b4bf;mix-blend-mode:darken}
