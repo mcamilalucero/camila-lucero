@@ -53,4 +53,4 @@ html{scroll-padding-top:165px}
 @media(max-width:720px){.profile{display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"label" "copy" "art"}.profile-side{display:contents}.profile-side .section-label{grid-area:label}.profile-content{grid-area:copy}.profile-art{grid-area:art;width:min(100%,340px);margin-top:18px}}
 
 /* Darken keeps underlying letters legible where the pink highlight overlaps. */
-.hero h1 span{background:#e9b4bf;mix-blend-mode:darken}
+.hero h1 span{background:#f4ced5;mix-blend-mode:darken}
